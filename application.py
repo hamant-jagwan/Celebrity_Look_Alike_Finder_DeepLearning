@@ -9,6 +9,7 @@ from keras_vggface.vggface import VGGFace
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import re
+import time
 
 # Ensure upload directory exists
 os.makedirs('uploads', exist_ok=True)
@@ -56,26 +57,60 @@ st.title("Which Bollywood Celebrity Are You?")
 
 uploaded_image = st.file_uploader("Choose an image")
 
+
 if uploaded_image is not None:
     if save_uploaded_file(uploaded_image):
         display_image = Image.open(uploaded_image)
-        st.image(display_image, caption="Uploaded Image", use_column_width=True)
 
-        features = extract_feature(os.path.join('uploads', uploaded_image.name), model, detector)
-        if features is not None:
-            index_pos = recommend(feature_list, features)
-            filename = os.path.basename(filenames[index_pos])
-            name_without_ext = os.path.splitext(filename)[0]
-            cleaned_name = re.sub(r'[\W\d_]+$', '', name_without_ext)
-            predicted_actor = cleaned_name.replace("_", " ").strip()
-            
+        # Create two columns
+        col1, col2 = st.columns(2)
 
-            col1, col2 = st.columns(2)
-            with col1:
-                st.header("Your Uploaded Image")
-                st.image(display_image, width=300)
-            with col2:
-                st.header(f"Looks Like: {predicted_actor}")
-                st.image(filenames[index_pos], width=300)
-        else:
-            st.warning("No face detected! Please upload a clearer image.")
+        # Show uploaded image immediately
+        with col1:
+            st.subheader("Your Uploaded Image")
+            st.image(display_image, width=300)
+
+        # Placeholder for predicted image and name
+        with col2:
+            placeholder_name = st.empty()
+            placeholder_image = st.empty()
+
+            # Show loader while predicting
+            with st.spinner("Predicting..."):
+                # Extract features and get prediction
+                features = extract_feature(os.path.join('uploads', uploaded_image.name), model, detector)
+
+                if features is not None:
+                    index_pos = recommend(feature_list, features)
+                    filename = os.path.basename(filenames[index_pos])
+                    name_without_ext = os.path.splitext(filename)[0]
+                    cleaned_name = re.sub(r'[\W\d_]+$', '', name_without_ext)
+                    predicted_actor = cleaned_name.replace("_", " ").strip()
+
+                    # Wait 0.5 second before showing predicted image and name
+                    time.sleep(0.5)
+
+                    # Update placeholders
+                    placeholder_name.subheader(f"Looks Like: {predicted_actor}")
+                    placeholder_image.image(filenames[index_pos], width=300)
+                else:
+                    placeholder_name.warning("No face detected! Please upload a clearer image.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
