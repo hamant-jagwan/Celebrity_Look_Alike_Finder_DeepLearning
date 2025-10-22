@@ -88,7 +88,7 @@ if uploaded_image is not None:
                     predicted_actor = cleaned_name.replace("_", " ").strip()
 
                     # Wait 0.5 second before showing predicted image and name
-                    time.sleep(0.5)
+                    time.sleep(0.2)
 
                     # Update placeholders
                     placeholder_name.subheader(f"Looks Like: {predicted_actor}")
